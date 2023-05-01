@@ -2,7 +2,6 @@ import 'package:e1547/app/app.dart';
 import 'package:e1547/interface/interface.dart';
 import 'package:e1547/post/post.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 class PostDetailImage extends StatelessWidget {
   const PostDetailImage({required this.post});
@@ -27,37 +26,31 @@ class PostDetailVideo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    VideoPlayerController? videoController = post.getVideo(context);
-    return PostVideoLoader(
-      post: post,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: videoController != null
-            ? () => videoController.value.isPlaying
-                ? videoController.pause()
-                : videoController.play()
-            : null,
-        child: Stack(
-          alignment: Alignment.center,
-          fit: StackFit.passthrough,
-          children: [
-            PostVideoWidget(post: post),
-            Positioned.fill(
-              child: Center(
-                child: CrossFade.builder(
-                  showChild: post.getVideo(context) != null,
-                  builder: (context) => Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                    child:
-                        VideoButton(videoController: post.getVideo(context)!),
-                  ),
-                  secondChild: const SizedCircularProgressIndicator(size: 24),
+    Player? player = post.getVideo(context);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: player != null
+          ? () => player.state.playing ? player.pause() : player.play()
+          : null,
+      child: Stack(
+        alignment: Alignment.center,
+        fit: StackFit.passthrough,
+        children: [
+          PostVideoWidget(post: post),
+          Positioned.fill(
+            child: Center(
+              child: CrossFade.builder(
+                showChild: post.getVideo(context) != null,
+                builder: (context) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                  child: VideoButton(player: post.getVideo(context)!),
                 ),
+                secondChild: const SizedCircularProgressIndicator(size: 24),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -181,17 +174,15 @@ class PostDetailImageActions extends StatelessWidget {
           );
         }
 
-        VideoPlayerController? videoController = post.getVideo(context);
+        Player? player = post.getVideo(context);
 
         return Stack(
           fit: StackFit.passthrough,
           children: [
             InkWell(
               hoverColor: Colors.transparent,
-              onTap: videoController != null
-                  ? () => videoController.value.isPlaying
-                      ? videoController.pause()
-                      : videoController.play()
+              onTap: player != null
+                  ? () => player.state.playing ? player.pause() : player.play()
                   : onTap,
               child: child,
             ),

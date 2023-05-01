@@ -15,7 +15,6 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_storage/shared_storage.dart';
-import 'package:video_player/video_player.dart';
 
 extension PostTagging on Post {
   bool hasTag(String tag) {
@@ -261,10 +260,7 @@ extension PostTyping on Post {
     switch (file.ext) {
       case 'mp4':
       case 'webm':
-        if (Platform.isAndroid || Platform.isIOS) {
-          return PostType.video;
-        }
-        return PostType.unsupported;
+        return PostType.video;
       case 'swf':
         return PostType.unsupported;
       default:
@@ -281,22 +277,23 @@ extension PostVideoPlaying on Post {
         )
       : null;
 
-  VideoPlayerController? getVideo(BuildContext context) {
+  Player? getVideo(BuildContext context) {
     if (videoConfig != null) {
-      return VideoHandler.of(context).getVideo(videoConfig!);
+      return context.read<VideoHandler>().getVideo(videoConfig!);
     }
     return null;
   }
 
-  Future<void> loadVideo(BuildContext context) async {
+  Player? watchVideo(BuildContext context) {
     if (videoConfig != null) {
-      await VideoHandler.of(context).loadVideo(videoConfig!);
+      return context.watch<VideoHandler>().getVideo(videoConfig!);
     }
+    return null;
   }
 
   Future<void> disposeVideo(BuildContext context) async {
     if (videoConfig != null) {
-      await VideoHandler.of(context).disposeVideo(videoConfig!);
+      await context.read<VideoHandler>().disposeVideo(videoConfig!);
     }
   }
 }

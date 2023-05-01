@@ -39,7 +39,7 @@ class _PostFullscreenFrameState extends State<PostFullscreenFrame> {
             endDrawer: widget.endDrawer,
             bottomNavigationBar: widget.post.getVideo(context) != null
                 ? VideoBar(
-                    videoController: widget.post.getVideo(context)!,
+                    player: widget.post.getVideo(context)!,
                   )
                 : null,
             body: GestureDetector(
@@ -47,7 +47,7 @@ class _PostFullscreenFrameState extends State<PostFullscreenFrame> {
               onTap: () {
                 ScaffoldFrameController controller = ScaffoldFrame.of(context);
                 controller.toggleFrame();
-                if ((widget.post.getVideo(context)?.value.isPlaying ?? false) &&
+                if ((widget.post.getVideo(context)?.state.playing ?? false) &&
                     controller.visible) {
                   controller.hideFrame(duration: const Duration(seconds: 2));
                 }
@@ -59,7 +59,7 @@ class _PostFullscreenFrameState extends State<PostFullscreenFrame> {
                   widget.child,
                   if (widget.post.getVideo(context) != null)
                     VideoButton(
-                      videoController: widget.post.getVideo(context)!,
+                      player: widget.post.getVideo(context)!,
                     ),
                 ],
               ),

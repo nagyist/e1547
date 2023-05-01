@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   AppInfo appInfo = await initializeAppInfo();
   AppDatabases databases = await initializeAppdatabases(info: appInfo);
   Logs logs = await initializeLogger(databases: databases);
