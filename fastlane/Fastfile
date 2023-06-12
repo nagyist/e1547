@@ -7,17 +7,6 @@ add_extra_platforms(
 
 default_platform(:android)
 
-def fetch_current_version
-    YAML.safe_load(File.read('../pubspec.yaml'))['version']
-end
-
-def fetch_versions
-  path = "../CHANGELOG.md"
-  content = File.read(path)
-  regex = /## \[(.+\+\d+)\]/
-  content.scan(regex).map(&:first)
-end
-
 platform :android do
   desc "Ensures flutter is installed"
   lane :bootstrap do
@@ -42,18 +31,10 @@ platform :android do
   desc "Writes playstore changelogs from CHANGELOG.md"
   lane :changelog do
     sh("dart pub global activate cider")
-    versions = fetch_versions
+    versions = sh("cider list").split("\n")
     versions.each do |version|
-      if version == 'Unreleased'
-        next
-      end
       build_number = version.split('+').last
-      full_description = sh("cider describe #{version}")
-      description_lines = full_description.split("\n")
-      # removes header and link, primitively. update this later?
-      description_lines.shift
-      description_lines.pop(2)
-      description = description_lines.join("\n")
+      description = sh("cider describe #{version} --only-body")
       changelogs = "./metadata/android/en-US/changelogs"
       FileUtils.mkdir_p(changelogs)
       File.open("#{changelogs}/#{build_number}.txt", 'w') do |file|
@@ -64,7 +45,7 @@ platform :android do
 
   desc "Uploads appbundle to playstore"
   lane :upload do
-    build_number = fetch_current_version.split("+")[1]
+    build_number = sh("cider version").split("+")[1]
     upload_to_play_store(
       aab: "build/app/outputs/bundle/release/app-release.aab",
       version_code: build_number,
