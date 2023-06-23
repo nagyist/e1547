@@ -383,6 +383,26 @@ class Client {
     return Wiki.fromJson(body);
   }
 
+  Future<List<User>> users(
+    int page, {
+    String? search,
+    bool? force,
+    CancelToken? cancelToken,
+  }) async {
+    List<dynamic> body = await _dio
+        .get(
+          'users.json',
+          queryParameters: {
+            'search': search,
+          },
+          options: forceOptions(force),
+          cancelToken: cancelToken,
+        )
+        .then((response) => response.data);
+
+    return body.map((entry) => User.fromJson(entry)).toList();
+  }
+
   Future<User> user(
     String name, {
     bool? force,
