@@ -43,50 +43,17 @@ class Tagset extends Iterable<StringTag> {
   @override
   Iterator<StringTag> get iterator => _tags.values.iterator;
 
-  @override
-  String toString() {
-    List<StringTag> meta = [];
-    List<StringTag> normal = [];
-
-    for (StringTag t in _tags.values) {
-      if (t.value != null) {
-        meta.add(t);
-      } else {
-        normal.add(t);
-      }
-    }
-
-    // normal tags, then optional, then subtracting
-    int order(StringTag a, StringTag b) {
-      int getPrefixValue(String prefix) {
-        switch (prefix) {
-          case '-':
-            return 1;
-          case '~':
-            return 0;
-          default:
-            return -1;
-        }
-      }
-
-      int firstValue = getPrefixValue(a.name[0]);
-      int secondValue = getPrefixValue(b.name[0]);
-      return firstValue.compareTo(secondValue);
-    }
-
-    normal.sort(order);
-    meta.sort(order);
-
-    // meta tags first
-    List<StringTag> output = [];
-    output.addAll(meta);
-    output.addAll(normal);
-    return output.join(' ');
+  List<String> toStringList() {
+    List<StringTag> sorted = List.of(_tags.values)..sort();
+    return sorted.map((e) => e.toString()).toList();
   }
+
+  @override
+  String toString() => toStringList().join(' ');
 }
 
 @immutable
-class StringTag {
+class StringTag implements Comparable<StringTag> {
   const StringTag(this.name, [this._value]);
 
   factory StringTag.parse(String tag) {
@@ -111,4 +78,34 @@ class StringTag {
 
   @override
   int get hashCode => toString().hashCode;
+
+  @override
+  int compareTo(StringTag other) {
+    // meta tags come after normal tags
+    if (value != null) {
+      if (other.value == null) {
+        return 1;
+      }
+    } else if (other.value != null) {
+      return -1;
+    }
+
+    // regular tags, then optional, then subtracting
+    int getPrefix(String prefix) {
+      switch (prefix[0]) {
+        case '-':
+          return 1;
+        case '~':
+          return 0;
+        default:
+          return -1;
+      }
+    }
+
+    int out = getPrefix(name).compareTo(getPrefix(other.name));
+    if (out == 0) {
+      out = name.compareTo(other.name);
+    }
+    return out;
+  }
 }
