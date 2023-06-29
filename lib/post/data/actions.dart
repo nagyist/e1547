@@ -145,15 +145,11 @@ extension PostDownloading on Post {
         String downloadMime = await _throwOnNull(lookupMimeType(download.path),
             'Could not determine MIME of download!');
         Uri target = Uri.parse(settings.downloadPath.value);
-        if (target.path == '/tree/primary${Uri.encodeComponent(':Pictures')}') {
-          target = Uri(path: '${target.path}/${appInfo.appName}');
-        }
         if (!await isPersistedUri(target)) {
           target = await _throwOnNull(
             openDocumentTree(initialUri: target),
             'No SAF folder was chosen!',
           );
-          settings.downloadPath.value = target.toString();
         }
         DocumentFile dir = await _throwOnNull(
             target.toDocumentFile(), 'Could not open SAF folder!');
@@ -172,6 +168,7 @@ extension PostDownloading on Post {
             );
           }
         }
+        settings.downloadPath.value = target.toString();
         DocumentFile? file = await dir.findFile(_downloadName());
         if (file != null) {
           Digest downloadMd5 = md5.convert(downloadBytes);
